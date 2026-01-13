@@ -3221,6 +3221,7 @@ impl CodexMessageProcessor {
             scopes.as_deref().unwrap_or_default(),
             timeout_secs,
             config.mcp_oauth_callback_port,
+            config.mcp_oauth_callback_url_template.as_deref(),
         )
         .await
         {
