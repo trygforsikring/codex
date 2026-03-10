@@ -19,6 +19,7 @@ use crate::thread_status::resolve_thread_status;
 use chrono::DateTime;
 use chrono::SecondsFormat;
 use chrono::Utc;
+use codex_core::config::types::McpOauthCallbackPathMode;
 use codex_app_server_protocol::Account;
 use codex_app_server_protocol::AccountLoginCompletedNotification;
 use codex_app_server_protocol::AccountUpdatedNotification;
@@ -158,6 +159,7 @@ use codex_app_server_protocol::ThreadUnsubscribeResponse;
 use codex_app_server_protocol::ThreadUnsubscribeStatus;
 use codex_app_server_protocol::Turn;
 use codex_app_server_protocol::TurnInterruptParams;
+use codex_rmcp_client::CallbackPathMatchMode;
 use codex_app_server_protocol::TurnStartParams;
 use codex_app_server_protocol::TurnStartResponse;
 use codex_app_server_protocol::TurnStatus;
@@ -4353,6 +4355,11 @@ impl CodexMessageProcessor {
 
         let scopes = scopes.or_else(|| server.scopes.clone());
 
+        let path_match_mode = match config.mcp_oauth_callback_path_mode {
+            McpOauthCallbackPathMode::Exact => CallbackPathMatchMode::Exact,
+            McpOauthCallbackPathMode::Suffix => CallbackPathMatchMode::Suffix,
+        };
+
         match perform_oauth_login_return_url(
             &name,
             &url,
@@ -4364,6 +4371,7 @@ impl CodexMessageProcessor {
             timeout_secs,
             config.mcp_oauth_callback_port,
             config.mcp_oauth_callback_url.as_deref(),
+            path_match_mode,
         )
         .await
         {

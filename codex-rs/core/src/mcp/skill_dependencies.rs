@@ -8,6 +8,7 @@ use codex_protocol::request_user_input::RequestUserInputQuestion;
 use codex_protocol::request_user_input::RequestUserInputQuestionOption;
 use codex_protocol::request_user_input::RequestUserInputResponse;
 use codex_rmcp_client::perform_oauth_login;
+use codex_rmcp_client::CallbackPathMatchMode;
 use tokio_util::sync::CancellationToken;
 use tracing::warn;
 
@@ -18,6 +19,7 @@ use crate::codex::TurnContext;
 use crate::config::Config;
 use crate::config::edit::ConfigEditsBuilder;
 use crate::config::load_global_mcp_servers;
+use crate::config::types::McpOauthCallbackPathMode;
 use crate::config::types::McpServerConfig;
 use crate::config::types::McpServerTransportConfig;
 use crate::default_client::is_first_party_originator;
@@ -236,6 +238,11 @@ pub(crate) async fn maybe_install_mcp_dependencies(
         )
         .await;
 
+        let path_match_mode = match config.mcp_oauth_callback_path_mode {
+            McpOauthCallbackPathMode::Exact => CallbackPathMatchMode::Exact,
+            McpOauthCallbackPathMode::Suffix => CallbackPathMatchMode::Suffix,
+        };
+
         if let Err(err) = perform_oauth_login(
             &name,
             &oauth_config.url,
@@ -246,6 +253,7 @@ pub(crate) async fn maybe_install_mcp_dependencies(
             server_config.oauth_resource.as_deref(),
             config.mcp_oauth_callback_port,
             config.mcp_oauth_callback_url.as_deref(),
+            path_match_mode,
         )
         .await
         {

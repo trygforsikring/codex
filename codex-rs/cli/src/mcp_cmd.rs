@@ -11,6 +11,7 @@ use codex_core::config::edit::ConfigEditsBuilder;
 use codex_core::config::find_codex_home;
 use codex_core::config::load_global_mcp_servers;
 use codex_core::config::types::McpServerConfig;
+use codex_core::config::types::McpOauthCallbackPathMode;
 use codex_core::config::types::McpServerTransportConfig;
 use codex_core::mcp::McpManager;
 use codex_core::mcp::auth::McpOAuthLoginSupport;
@@ -19,6 +20,7 @@ use codex_core::mcp::auth::oauth_login_support;
 use codex_core::plugins::PluginsManager;
 use codex_protocol::protocol::McpAuthStatus;
 use codex_rmcp_client::delete_oauth_tokens;
+use codex_rmcp_client::CallbackPathMatchMode;
 use codex_rmcp_client::perform_oauth_login;
 use codex_utils_cli::CliConfigOverrides;
 use codex_utils_cli::format_env_display::format_env_display;
@@ -269,6 +271,10 @@ async fn run_add(config_overrides: &CliConfigOverrides, add_args: AddArgs) -> Re
     match oauth_login_support(&transport).await {
         McpOAuthLoginSupport::Supported(oauth_config) => {
             println!("Detected OAuth support. Starting OAuth flow…");
+            let path_match_mode = match config.mcp_oauth_callback_path_mode {
+                McpOauthCallbackPathMode::Exact => CallbackPathMatchMode::Exact,
+                McpOauthCallbackPathMode::Suffix => CallbackPathMatchMode::Suffix,
+            };
             perform_oauth_login(
                 &name,
                 &oauth_config.url,
@@ -279,6 +285,7 @@ async fn run_add(config_overrides: &CliConfigOverrides, add_args: AddArgs) -> Re
                 None,
                 config.mcp_oauth_callback_port,
                 config.mcp_oauth_callback_url.as_deref(),
+                path_match_mode,
             )
             .await?;
             println!("Successfully logged in.");
@@ -356,6 +363,11 @@ async fn run_login(config_overrides: &CliConfigOverrides, login_args: LoginArgs)
         scopes = server.scopes.clone().unwrap_or_default();
     }
 
+    let path_match_mode = match config.mcp_oauth_callback_path_mode {
+        McpOauthCallbackPathMode::Exact => CallbackPathMatchMode::Exact,
+        McpOauthCallbackPathMode::Suffix => CallbackPathMatchMode::Suffix,
+    };
+
     perform_oauth_login(
         &name,
         &url,
@@ -366,6 +378,7 @@ async fn run_login(config_overrides: &CliConfigOverrides, login_args: LoginArgs)
         server.oauth_resource.as_deref(),
         config.mcp_oauth_callback_port,
         config.mcp_oauth_callback_url.as_deref(),
+        path_match_mode,
     )
     .await?;
     println!("Successfully logged in to MCP server '{name}'.");

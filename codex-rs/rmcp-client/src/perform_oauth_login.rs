@@ -29,6 +29,13 @@ struct OauthHeaders {
     env_http_headers: Option<HashMap<String, String>>,
 }
 
+/// Controls how strictly we match the callback path for OAuth redirects.
+#[derive(Clone, Copy, Debug)]
+pub enum CallbackPathMatchMode {
+    Exact,
+    Suffix,
+}
+
 struct CallbackServerGuard {
     server: Arc<Server>,
 }
@@ -50,6 +57,7 @@ pub async fn perform_oauth_login(
     oauth_resource: Option<&str>,
     callback_port: Option<u16>,
     callback_url: Option<&str>,
+    path_match_mode: CallbackPathMatchMode,
 ) -> Result<()> {
     let headers = OauthHeaders {
         http_headers,
@@ -66,6 +74,7 @@ pub async fn perform_oauth_login(
         callback_port,
         callback_url,
         None,
+        path_match_mode,
     )
     .await?
     .finish()
@@ -84,6 +93,7 @@ pub async fn perform_oauth_login_return_url(
     timeout_secs: Option<i64>,
     callback_port: Option<u16>,
     callback_url: Option<&str>,
+    path_match_mode: CallbackPathMatchMode,
 ) -> Result<OauthLoginHandle> {
     let headers = OauthHeaders {
         http_headers,
@@ -100,6 +110,7 @@ pub async fn perform_oauth_login_return_url(
         callback_port,
         callback_url,
         timeout_secs,
+        path_match_mode,
     )
     .await?;
 
@@ -113,11 +124,12 @@ fn spawn_callback_server(
     server: Arc<Server>,
     tx: oneshot::Sender<(String, String)>,
     expected_callback_path: String,
+    path_match_mode: CallbackPathMatchMode,
 ) {
     tokio::task::spawn_blocking(move || {
         while let Ok(request) = server.recv() {
             let path = request.url().to_string();
-            match parse_oauth_callback(&path, &expected_callback_path) {
+            match parse_oauth_callback(&path, &expected_callback_path, path_match_mode) {
                 CallbackOutcome::Success(OauthCallbackResult { code, state }) => {
                     let response = Response::from_string(
                         "Authentication complete. You may close this window.",
@@ -160,11 +172,21 @@ enum CallbackOutcome {
     Invalid,
 }
 
-fn parse_oauth_callback(path: &str, expected_callback_path: &str) -> CallbackOutcome {
+fn parse_oauth_callback(
+    path: &str,
+    expected_callback_path: &str,
+    mode: CallbackPathMatchMode,
+) -> CallbackOutcome {
     let Some((route, query)) = path.split_once('?') else {
         return CallbackOutcome::Invalid;
     };
-    if route != expected_callback_path {
+    let route_ok = match mode {
+        CallbackPathMatchMode::Exact => route == expected_callback_path,
+        CallbackPathMatchMode::Suffix => {
+            route.starts_with('/') && expected_callback_path.ends_with(route)
+        }
+    };
+    if !route_ok {
         return CallbackOutcome::Invalid;
     }
 
@@ -312,6 +334,7 @@ impl OauthLoginFlow {
         callback_port: Option<u16>,
         callback_url: Option<&str>,
         timeout_secs: Option<i64>,
+        path_match_mode: CallbackPathMatchMode,
     ) -> Result<Self> {
         const DEFAULT_OAUTH_TIMEOUT_SECS: i64 = 300;
 
@@ -331,7 +354,7 @@ impl OauthLoginFlow {
         let callback_path = callback_path_from_redirect_uri(&redirect_uri)?;
 
         let (tx, rx) = oneshot::channel();
-        spawn_callback_server(server, tx, callback_path);
+        spawn_callback_server(server, tx, callback_path, path_match_mode);
 
         let OauthHeaders {
             http_headers,
@@ -461,26 +484,48 @@ fn append_query_param(url: &str, key: &str, value: Option<&str>) -> String {
 mod tests {
     use pretty_assertions::assert_eq;
 
-    use super::CallbackOutcome;
     use super::append_query_param;
     use super::callback_path_from_redirect_uri;
     use super::parse_oauth_callback;
+    use super::CallbackOutcome;
+    use super::CallbackPathMatchMode;
 
-    #[test]
     fn parse_oauth_callback_accepts_default_path() {
-        let parsed = parse_oauth_callback("/callback?code=abc&state=xyz", "/callback");
+        let parsed = parse_oauth_callback(
+            "/callback?code=abc&state=xyz",
+            "/callback",
+            CallbackPathMatchMode::Exact,
+        );
         assert!(matches!(parsed, CallbackOutcome::Success(_)));
     }
 
     #[test]
     fn parse_oauth_callback_accepts_custom_path() {
-        let parsed = parse_oauth_callback("/oauth/callback?code=abc&state=xyz", "/oauth/callback");
+        let parsed = parse_oauth_callback(
+            "/oauth/callback?code=abc&state=xyz",
+            "/oauth/callback",
+            CallbackPathMatchMode::Exact,
+        );
+        assert!(matches!(parsed, CallbackOutcome::Success(_)));
+    }
+
+    #[test]
+    fn parse_oauth_callback_accepts_suffix_callback_path() {
+        let parsed = parse_oauth_callback(
+            "/callback?code=abc&state=xyz",
+            "/proxy/43119/callback",
+            CallbackPathMatchMode::Suffix,
+        );
         assert!(matches!(parsed, CallbackOutcome::Success(_)));
     }
 
     #[test]
     fn parse_oauth_callback_rejects_wrong_path() {
-        let parsed = parse_oauth_callback("/callback?code=abc&state=xyz", "/oauth/callback");
+        let parsed = parse_oauth_callback(
+            "/other?code=abc&state=xyz",
+            "/oauth/callback",
+            CallbackPathMatchMode::Exact,
+        );
         assert!(matches!(parsed, CallbackOutcome::Invalid));
     }
 

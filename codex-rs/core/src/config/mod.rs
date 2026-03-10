@@ -10,6 +10,7 @@ use crate::config::types::McpServerTransportConfig;
 use crate::config::types::MemoriesConfig;
 use crate::config::types::MemoriesToml;
 use crate::config::types::ModelAvailabilityNuxConfig;
+use crate::config::types::McpOauthCallbackPathMode;
 use crate::config::types::Notice;
 use crate::config::types::NotificationMethod;
 use crate::config::types::Notifications;
@@ -354,6 +355,12 @@ pub struct Config {
     /// of the local listener address. The local callback listener still binds
     /// to 127.0.0.1 (using `mcp_oauth_callback_port` when provided).
     pub mcp_oauth_callback_url: Option<String>,
+
+    /// How strictly Codex should match the OAuth callback path.
+    /// - `exact` (default): require the full path to match.
+    /// - `suffix`: allow callbacks whose path is a suffix of the expected path
+    ///   (for example, when a front proxy strips a path prefix).
+    pub mcp_oauth_callback_path_mode: McpOauthCallbackPathMode,
 
     /// Combined provider map (defaults merged with user-defined overrides).
     pub model_providers: HashMap<String, ModelProviderInfo>,
@@ -1138,6 +1145,13 @@ pub struct ConfigToml {
     /// of the local listener address. The local callback listener still binds
     /// to 127.0.0.1 (using `mcp_oauth_callback_port` when provided).
     pub mcp_oauth_callback_url: Option<String>,
+
+    /// How strictly Codex should match the OAuth callback path.
+    /// - `exact` (default): require the full path to match.
+    /// - `suffix`: allow callbacks whose path is a suffix of the expected path
+    ///   (for example, when a front proxy strips a path prefix).
+    #[serde(default)]
+    pub mcp_oauth_callback_path_mode: Option<McpOauthCallbackPathMode>,
 
     /// User-defined provider entries that extend/override the built-in list.
     #[serde(default)]
@@ -2377,6 +2391,9 @@ impl Config {
             mcp_oauth_credentials_store_mode: cfg.mcp_oauth_credentials_store.unwrap_or_default(),
             mcp_oauth_callback_port: cfg.mcp_oauth_callback_port,
             mcp_oauth_callback_url: cfg.mcp_oauth_callback_url.clone(),
+            mcp_oauth_callback_path_mode: cfg
+                .mcp_oauth_callback_path_mode
+                .unwrap_or_default(),
             model_providers,
             project_doc_max_bytes: cfg.project_doc_max_bytes.unwrap_or(PROJECT_DOC_MAX_BYTES),
             project_doc_fallback_filenames: cfg
