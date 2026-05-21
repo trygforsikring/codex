@@ -1856,6 +1856,7 @@ impl PluginRequestProcessor {
             let keyring_backend_kind = config.auth_keyring_backend_kind();
             let callback_port = config.mcp_oauth_callback_port;
             let callback_url = config.mcp_oauth_callback_url.clone();
+            let callback_path_match_mode = config.mcp_oauth_callback_path_mode.into();
             let outgoing = Arc::clone(&self.outgoing);
             let notification_name = name.clone();
 
@@ -1873,6 +1874,7 @@ impl PluginRequestProcessor {
                     server.oauth_resource.as_deref(),
                     callback_port,
                     callback_url.as_deref(),
+                    callback_path_match_mode,
                 )
                 .await;
 
@@ -1890,6 +1892,7 @@ impl PluginRequestProcessor {
                             server.oauth_resource.as_deref(),
                             callback_port,
                             callback_url.as_deref(),
+                            callback_path_match_mode,
                         )
                         .await
                     }
