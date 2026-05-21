@@ -14,6 +14,7 @@ use crate::types::AuthCredentialsStoreMode;
 use crate::types::FeedbackConfigToml;
 use crate::types::History;
 use crate::types::MarketplaceConfig;
+use crate::types::McpOauthCallbackPathMode;
 use crate::types::McpServerConfig;
 use crate::types::MemoriesToml;
 use crate::types::Notice;
@@ -281,6 +282,12 @@ pub struct ConfigToml {
     /// of the local listener address. The local callback listener still binds
     /// to 127.0.0.1 (using `mcp_oauth_callback_port` when provided).
     pub mcp_oauth_callback_url: Option<String>,
+
+    /// How strictly Codex should match the MCP OAuth callback path.
+    /// `exact` (default) requires the full path to match. `suffix` allows
+    /// callbacks whose path is a suffix of the expected path, for front proxies
+    /// that strip a path prefix before forwarding to Codex.
+    pub mcp_oauth_callback_path_mode: Option<McpOauthCallbackPathMode>,
 
     /// User-defined provider entries that extend the built-in list. Built-in
     /// IDs cannot be overridden.

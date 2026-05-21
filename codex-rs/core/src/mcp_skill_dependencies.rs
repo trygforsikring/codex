@@ -160,6 +160,7 @@ pub(crate) async fn maybe_install_mcp_dependencies(
             server_config.oauth_resource.as_deref(),
             config.mcp_oauth_callback_port,
             config.mcp_oauth_callback_url.as_deref(),
+            config.mcp_oauth_callback_path_mode.into(),
         )
         .await;
 
@@ -177,6 +178,7 @@ pub(crate) async fn maybe_install_mcp_dependencies(
                     server_config.oauth_resource.as_deref(),
                     config.mcp_oauth_callback_port,
                     config.mcp_oauth_callback_url.as_deref(),
+                    config.mcp_oauth_callback_path_mode.into(),
                 )
                 .await
                 {

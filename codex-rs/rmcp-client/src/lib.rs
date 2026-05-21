@@ -28,6 +28,7 @@ pub use oauth::WrappedOAuthTokenResponse;
 pub use oauth::delete_oauth_tokens;
 pub(crate) use oauth::load_oauth_tokens;
 pub use oauth::save_oauth_tokens;
+pub use perform_oauth_login::CallbackPathMatchMode;
 pub use perform_oauth_login::OAuthProviderError;
 pub use perform_oauth_login::OauthLoginHandle;
 pub use perform_oauth_login::perform_oauth_login;

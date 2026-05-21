@@ -29,6 +29,7 @@ use codex_mcp::oauth_login_support;
 use codex_mcp::resolve_oauth_scopes;
 use codex_mcp::should_retry_without_scopes;
 use codex_protocol::protocol::McpAuthStatus;
+use codex_rmcp_client::CallbackPathMatchMode;
 use codex_rmcp_client::delete_oauth_tokens;
 use codex_rmcp_client::perform_oauth_login;
 use codex_utils_cli::CliConfigOverrides;
@@ -222,6 +223,7 @@ async fn perform_oauth_login_retry_without_scopes(
     oauth_resource: Option<&str>,
     callback_port: Option<u16>,
     callback_url: Option<&str>,
+    callback_path_match_mode: CallbackPathMatchMode,
 ) -> Result<()> {
     match perform_oauth_login(
         name,
@@ -235,6 +237,7 @@ async fn perform_oauth_login_retry_without_scopes(
         oauth_resource,
         callback_port,
         callback_url,
+        callback_path_match_mode,
     )
     .await
     {
@@ -253,6 +256,7 @@ async fn perform_oauth_login_retry_without_scopes(
                 oauth_resource,
                 callback_port,
                 callback_url,
+                callback_path_match_mode,
             )
             .await
         }
@@ -399,6 +403,7 @@ async fn run_add(config_overrides: &CliConfigOverrides, add_args: AddArgs) -> Re
                 oauth_resource.as_deref(),
                 config.mcp_oauth_callback_port,
                 config.mcp_oauth_callback_url.as_deref(),
+                config.mcp_oauth_callback_path_mode.into(),
             )
             .await?;
             println!("Successfully logged in.");
@@ -494,6 +499,7 @@ async fn run_login(config_overrides: &CliConfigOverrides, login_args: LoginArgs)
         server.oauth_resource.as_deref(),
         config.mcp_oauth_callback_port,
         config.mcp_oauth_callback_url.as_deref(),
+        config.mcp_oauth_callback_path_mode.into(),
     )
     .await?;
     println!("Successfully logged in to MCP server '{name}'.");

@@ -63,6 +63,7 @@ impl McpRuntimeSnapshot {
             auth_keyring_backend_kind: config.auth_keyring_backend_kind(),
             mcp_oauth_callback_port: config.mcp_oauth_callback_port,
             mcp_oauth_callback_url: config.mcp_oauth_callback_url.clone(),
+            mcp_oauth_callback_path_mode: config.mcp_oauth_callback_path_mode,
             skill_mcp_dependency_install_enabled: config
                 .features
                 .enabled(Feature::SkillMcpDependencyInstall),
