@@ -1896,6 +1896,7 @@ impl PluginRequestProcessor {
             let thread_manager = Arc::clone(&self.thread_manager);
             let http_client = Arc::clone(&http_client);
             let global_callback_url = config.mcp_oauth_callback_url.clone();
+            let callback_path_match_mode = config.mcp_oauth_callback_path_mode.into();
 
             tokio::spawn(async move {
                 let oauth_client_config = server.oauth.as_ref();
@@ -1913,6 +1914,7 @@ impl PluginRequestProcessor {
                     callback_port,
                     callback_url.as_deref(),
                     global_callback_url.as_deref(),
+                    callback_path_match_mode,
                     Arc::clone(&http_client),
                     redirect_mode,
                 )
@@ -1934,6 +1936,7 @@ impl PluginRequestProcessor {
                             callback_port,
                             callback_url.as_deref(),
                             global_callback_url.as_deref(),
+                            callback_path_match_mode,
                             http_client,
                             redirect_mode,
                         )

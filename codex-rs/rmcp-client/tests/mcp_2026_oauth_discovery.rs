@@ -663,6 +663,7 @@ async fn interactive_oauth_rejects_untrusted_authorization_metadata() -> anyhow:
                 /*callback_port*/ None,
                 /*callback_url*/ None,
                 /*global_callback_url*/ None,
+                codex_rmcp_client::CallbackPathMatchMode::Exact,
                 local_http_client(),
                 StreamableHttpRedirectMode::Legacy,
             )

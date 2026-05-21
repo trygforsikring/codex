@@ -28,6 +28,7 @@ use codex_config::McpServerTransportConfig;
 use codex_config::types::AppToolApproval;
 use codex_config::types::ApprovalsReviewer;
 use codex_config::types::AuthKeyringBackendKind;
+use codex_config::types::McpOauthCallbackPathMode;
 use codex_config::types::OAuthCredentialsStoreMode;
 use codex_connectors::ConnectorRuntimeManager;
 use codex_connectors::ConnectorSnapshot;
@@ -143,6 +144,8 @@ pub struct McpConfig {
     pub mcp_oauth_callback_port: Option<u16>,
     /// Optional OAuth redirect URI override for MCP login.
     pub mcp_oauth_callback_url: Option<String>,
+    /// How strictly Codex should match the MCP OAuth callback path.
+    pub mcp_oauth_callback_path_mode: McpOauthCallbackPathMode,
     /// How long a tool catalog capture waits for optional MCP servers to initialize.
     ///
     /// A zero duration disables the shared grace and waits for each server's

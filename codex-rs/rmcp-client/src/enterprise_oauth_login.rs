@@ -36,6 +36,7 @@ use crate::oauth::delete_oauth_tokens_with_lock_held;
 use crate::oauth::save_oauth_tokens_with_lock_held;
 use crate::oauth::validate_authorization_server_endpoints;
 use crate::oauth_client_registration::McpOAuthClientRegistration;
+use crate::perform_oauth_login::CallbackPathMatchMode;
 use crate::perform_oauth_login::OAuthHttpContext;
 use crate::perform_oauth_login::OAuthLoginPurpose;
 use crate::perform_oauth_login::OauthLoginFlow;
@@ -227,6 +228,7 @@ pub async fn perform_enterprise_oauth_login_return_url(
         request.callback_port,
         request.callback_url,
         /*global_callback_url*/ None,
+        CallbackPathMatchMode::Exact,
         request.timeout_secs,
     )
     .with_subscriber(tracing::subscriber::NoSubscriber::default())

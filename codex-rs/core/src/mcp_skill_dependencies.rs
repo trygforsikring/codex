@@ -206,6 +206,7 @@ async fn maybe_install_mcp_dependencies(
             callback_port,
             config.mcp_oauth_callback_url.as_deref(),
             config.mcp_oauth_callback_url.as_deref(),
+            config.mcp_oauth_callback_path_mode.into(),
             Arc::clone(&http_client),
         )
         .await;
@@ -226,6 +227,7 @@ async fn maybe_install_mcp_dependencies(
                     callback_port,
                     config.mcp_oauth_callback_url.as_deref(),
                     config.mcp_oauth_callback_url.as_deref(),
+                    config.mcp_oauth_callback_path_mode.into(),
                     Arc::clone(&http_client),
                 )
                 .await

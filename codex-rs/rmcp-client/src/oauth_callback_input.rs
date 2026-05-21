@@ -1,6 +1,7 @@
 //! Accepts a pasted OAuth redirect without navigating to it. The prepared callback address
 //! is checked before the existing OAuth flow validates state/issuer and exchanges the code.
 
+use super::CallbackPathMatchMode;
 use super::CallbackResult;
 use super::OAuthHttpContext;
 use super::OAuthLoginPurpose;
@@ -42,6 +43,7 @@ pub async fn perform_oauth_login_with_callback_input<F>(
     callback_port: Option<u16>,
     callback_url: Option<&str>,
     global_callback_url: Option<&str>,
+    callback_path_match_mode: CallbackPathMatchMode,
     http_client: Arc<dyn HttpClient>,
     read_callback: impl FnOnce(String) -> F,
 ) -> Result<()>
@@ -68,6 +70,7 @@ where
         callback_port,
         callback_url,
         global_callback_url,
+        callback_path_match_mode,
         /*timeout_secs*/ None,
     )
     .await?;

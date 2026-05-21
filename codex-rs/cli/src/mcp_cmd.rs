@@ -488,6 +488,7 @@ async fn run_add(config_overrides: &CliConfigOverrides, add_args: AddArgs) -> Re
                     .as_deref()
                     .or(config.mcp_oauth_callback_url.as_deref()),
                 config.mcp_oauth_callback_url.as_deref(),
+                config.mcp_oauth_callback_path_mode.into(),
                 http_client,
                 McpLoginMode::Browser,
             )
@@ -617,6 +618,7 @@ async fn run_login(config: &Config, login_args: LoginArgs) -> Result<()> {
         server.oauth_callback_port(config.mcp_oauth_callback_port),
         callback_url.as_deref(),
         config.mcp_oauth_callback_url.as_deref(),
+        config.mcp_oauth_callback_path_mode.into(),
         http_client,
         if no_browser {
             McpLoginMode::PasteCallback

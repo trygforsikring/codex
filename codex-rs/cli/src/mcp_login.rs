@@ -20,6 +20,7 @@ use codex_config::types::OAuthCredentialsStoreMode;
 use codex_exec_server::HttpClient;
 use codex_mcp::ResolvedMcpOAuthScopes;
 use codex_mcp::should_retry_without_scopes;
+use codex_rmcp_client::CallbackPathMatchMode;
 use codex_rmcp_client::McpOAuthClientRegistration;
 use codex_rmcp_client::perform_oauth_login;
 use codex_rmcp_client::perform_oauth_login_with_callback_input;
@@ -56,6 +57,7 @@ pub(crate) async fn perform_oauth_login_retry_without_scopes(
     callback_port: Option<u16>,
     callback_url: Option<&str>,
     global_callback_url: Option<&str>,
+    callback_path_match_mode: CallbackPathMatchMode,
     http_client: Arc<dyn HttpClient>,
     mode: McpLoginMode,
 ) -> Result<()> {
@@ -85,6 +87,7 @@ pub(crate) async fn perform_oauth_login_retry_without_scopes(
                         callback_port,
                         callback_url,
                         global_callback_url,
+                        callback_path_match_mode,
                         Arc::clone(&http_client),
                     )
                     .await
@@ -105,6 +108,7 @@ pub(crate) async fn perform_oauth_login_retry_without_scopes(
                         callback_port,
                         callback_url,
                         global_callback_url,
+                        callback_path_match_mode,
                         Arc::clone(&http_client),
                         move |authorization_url| read_callback(authorization_url, input),
                     )

@@ -230,6 +230,7 @@ impl McpRequestProcessor {
             server.oauth_callback_port(mcp_config.mcp_oauth_callback_port),
             callback_url.as_deref(),
             mcp_config.mcp_oauth_callback_url.as_deref(),
+            mcp_config.mcp_oauth_callback_path_mode.into(),
             http_client,
             redirect_mode,
         )

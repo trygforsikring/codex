@@ -8,6 +8,7 @@ use crate::server::McpCredentialPolicy;
 use codex_config::Constrained;
 use codex_config::types::AppToolApproval;
 use codex_config::types::AuthKeyringBackendKind;
+use codex_config::types::McpOauthCallbackPathMode;
 use codex_login::CodexAuth;
 use codex_plugin::AppConnectorId;
 use codex_plugin::PluginCapabilitySummary;
@@ -96,6 +97,7 @@ pub(crate) fn test_mcp_config(codex_home: PathBuf) -> McpConfig {
         auth_keyring_backend_kind: AuthKeyringBackendKind::default(),
         mcp_oauth_callback_port: None,
         mcp_oauth_callback_url: None,
+        mcp_oauth_callback_path_mode: McpOauthCallbackPathMode::Exact,
         optional_mcp_startup_grace: DEFAULT_OPTIONAL_MCP_STARTUP_GRACE,
         skill_mcp_dependency_install_enabled: true,
         approval_policy: Constrained::allow_any(AskForApproval::OnRequest),
