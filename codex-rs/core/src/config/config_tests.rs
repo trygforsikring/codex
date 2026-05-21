@@ -39,6 +39,7 @@ use codex_config::types::ApprovalsReviewer;
 use codex_config::types::BundledSkillsConfig;
 use codex_config::types::FeedbackConfigToml;
 use codex_config::types::HistoryPersistence;
+use codex_config::types::McpOauthCallbackPathMode;
 use codex_config::types::McpServerEnvVar;
 use codex_config::types::McpServerOAuthConfig;
 use codex_config::types::McpServerToolConfig;
@@ -8183,6 +8184,7 @@ async fn test_precedence_fixture_with_o3_profile() -> std::io::Result<()> {
             ),
             mcp_oauth_callback_port: None,
             mcp_oauth_callback_url: None,
+            mcp_oauth_callback_path_mode: McpOauthCallbackPathMode::Exact,
             model_providers: fixture.model_provider_map.clone(),
             project_doc_max_bytes: AGENTS_MD_MAX_BYTES,
             project_doc_fallback_filenames: Vec::new(),
@@ -8662,6 +8664,7 @@ async fn test_precedence_fixture_with_gpt3_profile() -> std::io::Result<()> {
         ),
         mcp_oauth_callback_port: None,
         mcp_oauth_callback_url: None,
+        mcp_oauth_callback_path_mode: McpOauthCallbackPathMode::Exact,
         model_providers: fixture.model_provider_map.clone(),
         project_doc_max_bytes: AGENTS_MD_MAX_BYTES,
         project_doc_fallback_filenames: Vec::new(),
@@ -8830,6 +8833,7 @@ async fn test_precedence_fixture_with_zdr_profile() -> std::io::Result<()> {
         ),
         mcp_oauth_callback_port: None,
         mcp_oauth_callback_url: None,
+        mcp_oauth_callback_path_mode: McpOauthCallbackPathMode::Exact,
         model_providers: fixture.model_provider_map.clone(),
         project_doc_max_bytes: AGENTS_MD_MAX_BYTES,
         project_doc_fallback_filenames: Vec::new(),
@@ -8983,6 +8987,7 @@ async fn test_precedence_fixture_with_gpt5_profile() -> std::io::Result<()> {
         ),
         mcp_oauth_callback_port: None,
         mcp_oauth_callback_url: None,
+        mcp_oauth_callback_path_mode: McpOauthCallbackPathMode::Exact,
         model_providers: fixture.model_provider_map.clone(),
         project_doc_max_bytes: AGENTS_MD_MAX_BYTES,
         project_doc_fallback_filenames: Vec::new(),
@@ -9622,6 +9627,17 @@ fn config_toml_deserializes_mcp_oauth_callback_url() {
     );
 }
 
+#[test]
+fn config_toml_deserializes_mcp_oauth_callback_path_mode() {
+    let toml = r#"mcp_oauth_callback_path_mode = "suffix""#;
+    let cfg: ConfigToml =
+        toml::from_str(toml).expect("TOML deserialization should succeed for callback path mode");
+    assert_eq!(
+        cfg.mcp_oauth_callback_path_mode,
+        Some(McpOauthCallbackPathMode::Suffix)
+    );
+}
+
 #[tokio::test]
 async fn config_loads_mcp_oauth_callback_port_from_toml() -> std::io::Result<()> {
     let codex_home = TempDir::new()?;
@@ -9784,6 +9800,30 @@ mcp_oauth_callback_url = "https://example.com/callback"
     assert_eq!(
         config.mcp_oauth_callback_url.as_deref(),
         Some("https://example.com/callback")
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn config_loads_mcp_oauth_callback_path_mode_from_toml() -> std::io::Result<()> {
+    let codex_home = TempDir::new()?;
+    let toml = r#"
+model = "gpt-5.4"
+mcp_oauth_callback_path_mode = "suffix"
+"#;
+    let cfg: ConfigToml =
+        toml::from_str(toml).expect("TOML deserialization should succeed for callback path mode");
+
+    let config = Config::load_from_base_config_with_overrides(
+        cfg,
+        ConfigOverrides::default(),
+        codex_home.abs(),
+    )
+    .await?;
+
+    assert_eq!(
+        config.mcp_oauth_callback_path_mode,
+        McpOauthCallbackPathMode::Suffix
     );
     Ok(())
 }

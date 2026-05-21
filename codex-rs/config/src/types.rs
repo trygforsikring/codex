@@ -112,6 +112,17 @@ pub enum OAuthCredentialsStoreMode {
     Keyring,
 }
 
+/// How strictly Codex should match the MCP OAuth callback path.
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum McpOauthCallbackPathMode {
+    /// Require the request path to exactly match the configured redirect URI path.
+    #[default]
+    Exact,
+    /// Allow the request path to be a suffix of the configured redirect URI path.
+    Suffix,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 pub enum WindowsSandboxModeToml {

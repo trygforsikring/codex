@@ -2,6 +2,7 @@ use super::*;
 use codex_config::Constrained;
 use codex_config::types::AppToolApproval;
 use codex_config::types::ApprovalsReviewer;
+use codex_config::types::McpOauthCallbackPathMode;
 use codex_login::CodexAuth;
 use codex_plugin::AppConnectorId;
 use codex_plugin::PluginCapabilitySummary;
@@ -23,6 +24,7 @@ fn test_mcp_config(codex_home: PathBuf) -> McpConfig {
         mcp_oauth_credentials_store_mode: OAuthCredentialsStoreMode::default(),
         mcp_oauth_callback_port: None,
         mcp_oauth_callback_url: None,
+        mcp_oauth_callback_path_mode: McpOauthCallbackPathMode::Exact,
         skill_mcp_dependency_install_enabled: true,
         approval_policy: Constrained::allow_any(AskForApproval::OnFailure),
         codex_linux_sandbox_exe: None,
