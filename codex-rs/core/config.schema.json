@@ -1232,6 +1232,25 @@
       },
       "type": "object"
     },
+    "McpOauthCallbackPathMode": {
+      "description": "How strictly Codex should match the MCP OAuth callback path.",
+      "oneOf": [
+        {
+          "description": "Require the request path to exactly match the configured redirect URI path.",
+          "enum": [
+            "exact"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Allow the request path to be a suffix of the configured redirect URI path.",
+          "enum": [
+            "suffix"
+          ],
+          "type": "string"
+        }
+      ]
+    },
     "McpServerEnvVar": {
       "anyOf": [
         {
@@ -4663,6 +4682,14 @@
       "default": {},
       "description": "User-level marketplace entries keyed by marketplace name.",
       "type": "object"
+    },
+    "mcp_oauth_callback_path_mode": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/McpOauthCallbackPathMode"
+        }
+      ],
+      "description": "How strictly Codex should match the MCP OAuth callback path. `exact` (default) requires the full path to match. `suffix` allows callbacks whose path is a suffix of the expected path, for front proxies that strip a path prefix before forwarding to Codex."
     },
     "mcp_oauth_callback_port": {
       "description": "Optional fixed port for the local HTTP callback server used during MCP OAuth login. When unset, Codex will bind to an ephemeral port chosen by the OS.",
